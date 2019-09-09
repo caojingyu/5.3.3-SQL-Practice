@@ -109,7 +109,27 @@ ORDER BY cost DESC
 
 /* Q9: This time, produce the same result as in Q8, but using a subquery. */
 
+SELECT  bkfc.starttime, bkfc.memid, CONCAT(Members.firstname, ' ', Members.surname) AS fullname, bkfc.facid, bkfc.name, bkfc.cost
+FROM
+(SELECT Bookings.starttime, Bookings.memid, Bookings.facid, Facilities.name, CASE WHEN Bookings.memid = '0' THEN Bookings.slots * Facilities.guestcost ELSE Bookings.slots * Facilities.membercost END AS cost
+FROM Bookings
+JOIN Facilities
+ON Facilities.facid = Bookings.facid) bkfc
+JOIN Members
+ON Members.memid = bkfc.memid
+Where bkfc.starttime LIKE '2012-09-14%'
+AND bkfc.cost >30
+ORDER BY bkfc.cost DESC
+
 
 /* Q10: Produce a list of facilities with a total revenue less than 1000.
 The output of facility name and total revenue, sorted by revenue. Remember
 that there's a different cost for guests and members! */
+
+SELECT Bookings.facid, Facilities.name, SUM(CASE WHEN Bookings.memid = '0' THEN Bookings.slots * Facilities.guestcost ELSE Bookings.slots * Facilities.membercost END) AS revenue
+FROM Bookings
+JOIN Facilities
+ON Facilities.facid = Bookings.facid
+GROUP BY name
+HAVING revenue < 1000
+ORDER BY revenue
